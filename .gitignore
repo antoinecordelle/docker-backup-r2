@@ -11,4 +11,6 @@ dist/
 
 # Local config & data
 .env
+.env.test
 backups/
+testdata/
