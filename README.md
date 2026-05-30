@@ -8,6 +8,34 @@ files into a host directory and keeps only the last few on disk. This tool
 ships those files off to R2 (your long-term archive) and decides what to keep
 there — without ever deleting something just because the source is offline.
 
+## Expected backup directory layout
+
+The source container must write **one file per backup**, with the timestamp
+embedded in the filename. The directory is a flat list of files — no
+sub-directories. Example:
+
+```
+/srv/myapp/backups/
+├── backup-2026-05-25T03-00-00.tar.gz
+├── backup-2026-05-26T03-00-00.tar.gz
+├── backup-2026-05-27T03-00-00.tar.gz
+├── backup-2026-05-28T03-00-00.tar.gz
+└── backup-2026-05-29T03-00-00.tar.gz
+```
+
+The source container typically keeps only the last N files on disk (its own
+rolling window). `docker-backup-r2` reads whatever is currently there and
+accumulates the full history in R2.
+
+**Filename requirements:**
+- Each file must have a unique name that identifies it across time — timestamps
+  work best.
+- The timestamp should follow a consistent, sortable pattern so
+  `BACKUP_TIMESTAMP_REGEX` can extract it reliably. ISO 8601 with dashes
+  instead of colons (`2026-05-29T03-00-00`) is filesystem-safe and recommended.
+- The tool doesn't care about the file format (`.tar.gz`, `.sql.gz`,
+  `.dump`, …) — set `BACKUP_GLOB` to match whatever your source produces.
+
 ## How it works
 
 Each cycle is **stateless and idempotent** — it reconciles against the live R2
