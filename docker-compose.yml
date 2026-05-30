@@ -1,0 +1,16 @@
+services:
+  backup-r2:
+    build: .
+    # Or pull the prebuilt image published by .github/workflows/ci.yml
+    # instead of building locally (comment out `build:` above if you do):
+    # image: ghcr.io/antoinecordelle/docker-backup-r2:latest
+    container_name: backup-r2
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # Mount the host directory where your container writes its backups,
+      # read-only — this uploader never needs to modify the source.
+      - ${BACKUP_DIR_HOST:-./backups}:/backups:ro
+    # The container schedules itself internally (loop mode). Logs go to stdout
+    # and are visible in `docker logs` / Portainer.
